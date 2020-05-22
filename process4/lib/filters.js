@@ -100,6 +100,7 @@ Fn.thresholdHSL = (image,options) => {
     return image;
 }
 
+
 //TODO change function to Fn.stats and return an object of stats -> Average, STD, etc...
 Fn.average = image => {
     const sum = image.data.reduce((a,b) => a + b, 0);

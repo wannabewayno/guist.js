@@ -150,6 +150,9 @@ async function Main(imageName, filters, progressHash) {
 });
 }
 
+// actually running the application 
+// ==============================================================================================
+
 // define our filters.
 const filters = [
     {

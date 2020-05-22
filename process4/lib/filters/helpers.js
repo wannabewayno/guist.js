@@ -3,27 +3,6 @@ const { Image }  = require('image-js');
 
 module.exports = {
 
-//filter function filters channels from an options object if applicable
-    filter: (channels ,options) => {
-
-        for (const channel in channels){
-
-            if( options[channel] !== undefined ){
-
-                channels[channel] = channels[channel].map(value => {
-                    const { upper, lower } = options[channel];
-                    if (value <= upper && value >= lower){
-                        return value;
-                    } else {
-                        return 0;
-                    }
-                });
-            }
-        }
-        
-        return channels;
-    },
-
     /** 
      * We split an array of arrays into a number of separate arrays defined by channels 
      * @param {array} array [<array>,<array>,<array>,...,<array>]
@@ -68,6 +47,8 @@ module.exports = {
             // }
         }
     },
+
+
     /** combine
      * combines an object of named channels into a pixelsArray
      * @param {object} channels { <channelName1>:<array>, <channelName2>:<array>,<channelName3>:<array>} 
@@ -87,7 +68,8 @@ module.exports = {
         return pixelsArray;
     },
 
-    /** setDataFromChannels
+    
+    /** matricForm()
      *  
      * @param  {object} channels
      * @param  {Image}  image
