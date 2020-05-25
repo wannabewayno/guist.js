@@ -1,3 +1,5 @@
+const { scaleHueClockwise, scaleHueAntiClockwise } = require('./scaleHue');
+
 const methods = { 
 
     /** ifAny()
@@ -48,7 +50,7 @@ const methods = {
     return pixel;
   },
 
-  
+
   /**ifThen() //TODO: UNDER CONSTRUCTION
    * if a value in target channel fails, then modify other channels
    * ? Example:
@@ -64,18 +66,124 @@ const methods = {
   },
 
 
-  /** shift() //TODO: NEEDS DEVELOPMENT
+  /** shift() //TODO: NEEDS MODULARISATION and DOCUMENTATION -> heavy on theory
     * on a FAIL, shifts hue into the allowed range.
     */
   shift: ( pixel, reference, replacement, options) => {
-    //probably have everything take a named object instead?
+    
     //hue will always be the first option defined. 
     if ( reference[0] === undefined ){
       throw new Error('Shift will only work when filtering with Hue')
     }
-    //need to know the difference in upper and lower values. that we filtered by
-    // if the keep range is smaller than the discard range, we will need to scale and shift the results.
 
+    if ( reference[0] === 0 ) {
+      shiftPixel()
+    }
+    // find the option assocaited with hue
+    let hueOption;
+    for (const option in options) {
+
+      if ( options[option].name === 'hue' ) {
+        hueOption = options[option];
+      }
+
+    }
+    // grab the boundary conditions specified
+    const { upper, lower} = hueOption.condition;
+    //clockwise or anti-clockwise phase shift
+    const { direction } = hueOption.direction;
+
+    // define the shift magnitude, the minimum phase required to shift
+    // any colour in the excluded region into the allowed region.
+    const shiftMagnitude = Math.abs( upper - lower );
+
+    //if we need to scale
+    const scaleFactor = ( 360 / shiftMagnitude ) - 1;
+
+    //TODO: this can be simplified using phasors, and wave addition
+    // we have eight possible cases to consider
+    if ( shiftMagnitude < 180 ) {
+
+      if ( upper < lower ) {
+        //* case 1
+        if ( direction === 'clockwise' ) {
+          pixel[0] -= shiftMagnitude;
+
+        } else { //anti-clockwise
+          pixel[0] += shiftMagnitude;
+
+        }
+
+      } else { //upper > lower
+        //* case 3
+        if ( direction === 'clockwise' ) {
+
+          const scaledHue = scaleHueClockwise( pixel[0], scaleFactor, upper, lower );
+          pixell[0] -= scaledHue; 
+
+        } else { //anti-clockwise
+
+          const scaledHue = scaleHueAntiClockwise( pixel[0], scaleFactor, upper, lower );
+          pixel[0] += scaledHue
+
+        }
+
+      }
+    } else { //shiftMagnitude > 180
+
+      if ( upper < lower ) {
+        // * case 2
+        if ( direction === 'clockwise' ) {
+
+          const scaledHue = scaleHueClockwise( pixel[0], scaleFactor, upper, lower );
+          shiftedHue = scaledHue - shiftMagnitude;
+          if (shiftedHue <= 0){
+            pixel[0] = 360 - shiftedHue;
+          } else {
+            pixel[0] = shiftedHue;
+          }
+
+        } else {
+
+          //anti-clockwise
+          const scaledHue = scaleHueAntiClockwise( pixel[0], scaleFactor, upper, lower );
+          const shiftedHue = scaledHue + shiftMagnitude;
+
+          if (shiftedHue >= 360){
+            pixel[0] = 0 + shiftedHue;
+          } else {
+            pixel[0] = shiftedHue;
+          }
+
+        }
+
+      } else { //upper > lower
+        // * case 4
+        if ( direction === 'clockwise' ) {
+
+          const shiftedHue = pixel[0] - shiftMagnitude;
+
+          if ( shiftedHue <= 0 ) {
+            pixel[0] = 360 - shiftedHue; 
+          } else {
+            pixel[0] = shiftedHue;
+          }
+
+        } else { // anti-clockwise
+          
+          const shiftedHue = pixel[0] + shiftMagnitude;
+
+          if ( shiftedHue <= 360 ) {
+            pixel[0] = 0 + shiftedHue; 
+          } else {
+            pixel[0] = shiftedHue;
+          }
+
+        }
+
+      }
+    }
+    return pixel;
   }
 };
 

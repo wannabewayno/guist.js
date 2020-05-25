@@ -5,16 +5,16 @@ const methods = require('./methods');
  *  replaces any pixel value that doesn't meet the specified conditions. 
  *  return the modified pixels to the caller. 
  * @param  {Array<Array>}  pixels - an array of pixel values to filter
+ * @param  {String} method - default 'ifAny' - the method to filter by 'ifAny','individual','ifThen','shift'
  * @param  {Array<Object>}  options - an array containing option's objects for each channel
- * @param  {String} options.name - the name of the channel to filter 
- * @param  {Object} options.condition - the conditions to filter by 
- * @param  {Number} [options.condition.upper = 100%] - any value above will be replaced 
- * @param  {Number} [options.condition.lower = 0%] - any value below will be replaced
- * @param  {Array}  [options.replacement = [0,0,0]] - replacement value for a pixel if it fails the test condition 
- * @param  {String} [options.method = 'ifAny'] - the method to filter by 'ifAny','individual','shift'
+ * @param  {String} option.name - the name of the channel to filter 
+ * @param  {Object} option.condition - the conditions to filter by 
+ * @param  {Number} [option.condition.upper = 100%] - any value above will be replaced 
+ * @param  {Number} [option.condition.lower = 0%] - any value below will be replaced
+ * @param  {Array}  [option.replacement = [0,0,0]] - replacement value for a pixel if it fails the test condition 
  * @return {Array}  - The modified pixels
  */
-const pixelFilter = (pixels , options) => {
+const pixelFilter = (pixels , method, options) => {
 
     // guard clause for mandatory options
     //============================================
@@ -46,7 +46,7 @@ const pixelFilter = (pixels , options) => {
             //grab the limits we're testing against
             const { upper, lower } = option.condition;
         
-            if( value >= lower && value <= upper){
+            if( value >= lower && value <= upper ){
                 // Pass, map a '1' mirroring the channelIndex
                 reference[index] = 1
             } else {
@@ -57,7 +57,7 @@ const pixelFilter = (pixels , options) => {
 
         // decide how to process the pixel with the defined method;
         // call upon the reference array and make a decision to pass the pixel or replace it
-        pixel = methods[options.method](pixel,reference,options.replacement)
+        pixel = methods[method](pixel,reference,options.replacement)
 
         return pixel;
     });

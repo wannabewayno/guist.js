@@ -9,12 +9,16 @@ module.exports = {
      * @param {number} channels
      */
     split: (pixelsArray,colourMode) => {
+        // the length of any pixel array will be the number of channels. So check the first one.
         const channels = pixelsArray[0].length;
+
+        // we set up a placeholder array to push values into. [ [], [], [] ] (e.g if three channels)
         splitArray = [];
         for (let i = 0; i < channels; i++) {
             splitArray.push([]);
         }
         
+        // we map over the empty array and map values into each channel placeholder
         splitArray = splitArray.map((channel,index) => {
             pixelsArray.forEach(subArray => {
                 channel.push(subArray[index]);
@@ -68,7 +72,7 @@ module.exports = {
         return pixelsArray;
     },
 
-    
+
     /** matricForm()
      *  
      * @param  {object} channels
