@@ -1,35 +1,37 @@
-const scaleHue = {
+const clamped360 = require('./clamped360');
+const shiftMagnitude = require('./shiftMagnitude');
 
-    scaleHueClockwise: ( hue, scaleFactor, upper, lower ) => {
+/** scaleHue()
+ * @param  {Number} hue - The hue [0,360]
+ * @param  {Object} hueOption - conditions imposed on filtering the hue value
+ * @param  {Number} hueOption.upper - upper limit from filter
+ * @param  {Number} hueOption.lower - lower limit from filter
+ * @param  {String} hueOption.direction - direction you want to shift, blueshift "anti-clockwise" or redshift "clockwise"
+ * @return {Number} - the scaled hue
+ */
+module.exports = scaleHue = ( hue, hueOption ) => {
+    const { upper, lower, direction } = hueOption;
+    const shiftMag = shiftMagnitude(hueOption);
+    const scaleFactor = ( 360 / shiftMag ) - 1;
 
-        const difference0Upper = 0;
+    let scaledHue;
 
-        if ( hue <= lower && hue >= 0 && upper > lower ) {
-            //as we now cross the 0, add on the difference from upper to 0 degree segment,  
-            difference0Upper = 360 - upper;
+    switch ( direction ) {
+
+        case ("clockwise"): {
+            const difference = clamped360( hue - upper ) / scaleFactor;
+            scaledHue = clamped360( upper + difference );
         }
+        break;
 
-        hue = upper + ( ( hue + difference0Upper ) - upper ) / scaleFactor;
+        case ("anti-clockwise"): {
+            const difference = clamped360( lower - hue ) / scaleFactor;
+            scaledHue = clamped360( lower - difference );
+        }
+        break;
 
-        return hue;
-    },
-
-
-    scaleHueAntiClockwise: ( hue, scaleFactor, upper , lower ) => {
-
-        const difference0Upper = 0;
-
-        if ( hue <=360 && hue >= upper && upper > lower) {
-
-            const difference0Upper = -360
-
-        } 
-            
-        hue = lower - ( lower - ( hue + difference0Upper ) ) / scaleFactor;
-        
-        return hue;
+        default: throw new Error('Not a recognised direction');
     }
 
+    return scaledHue
 }
-
-module.exports = scaleHue;

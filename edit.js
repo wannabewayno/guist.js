@@ -3,15 +3,11 @@
 const Fn = require('./process4/lib/filters.js');
 const { Image } = require('image-js');
 
-options = {
-  saturation:{
-    upper:100,
-    lower:80
-  },
-  lightness:{
-    upper:100,
-    lower:80
-  }
+const options = {
+  method:'shift',
+  conditions:[
+      { name:'H', lower:329, upper:330, direction:'anti-clockwise', },
+  ]
 }
 // Loading an image is asynchronous and will return a Promise.
 Image.load('./process4/raw/SB3cropped.png').then( image => {

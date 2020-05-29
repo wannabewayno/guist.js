@@ -1,6 +1,6 @@
 const channelsHSL = require('./filters/channelsHSL.js');
-const { filter } = require('./filters/helpers.js');
-const { convertRGB } = require('./filters/channelsRGB');
+const pixelFilter = require('./filters/pixelFilter.js');
+const convertRGB = require('./filters/convertRGB'); 
 const Fn = {};
 
 /** thresholdBinary
@@ -51,49 +51,12 @@ Fn.thresholdHSL = (image,options) => {
     console.log(image);
 
     //gets hsl data
-    pixelsArray = channelsHSL(image);
-    // console.log(channels);
-
-    //filters it with our options;
-    // channels = filter(channels,options);
-
-    //filter the pixelsArray with our options
-    // with this scheme, anything that does't pass the test will be set to black
-    pixelsArray = pixelsArray.map(pixel => {
-        [ hue, saturation, lightness] = pixel;
-
-        // if(options.hue!==undefined){
-        //     const { lower, upper } = options.hue;
-        //     if(hue >= lower && hue <= upper){
-        //         return [hue,saturation,lightness];
-        //     } else {
-        //         return [0,0,0];
-        //     }
-        // }
-
-        // if(options.saturation!==undefined){
-        //     const { lower, upper } = options.saturation;
-        //     if(saturation >= lower && saturation <= upper){
-        //         return [hue,saturation,lightness];
-        //     } else {
-        //         return [0,0,0];
-        //     }
-        // }
-
-        if(options.lightness!==undefined){
-            const { lower, upper } = options.lightness;
-            if(lightness >= lower && lightness <= upper){
-                return [hue,saturation,lightness];
-            } else {
-                return [0,0,0];
-            }   
-        }
-        
-    })
-    
+    let pixels = channelsHSL(image);
+   
+    pixels = pixelFilter(pixels,options);
 
     //converts hsl back to RGB and re-writes image data
-    image = convertRGB(image,pixelsArray);
+    image = convertRGB(image,pixels);
 
     console.log(image);
 
