@@ -7,6 +7,9 @@ const buildWorker = async () => {
     await worker.load();
     await worker.loadLanguage('eng');
     await worker.initialize('eng');
+    await worker.setParameters({
+        tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]. ',
+    });
     return new Promise((resolve,reject) => {
         resolve(worker);
         reject(new Error('error building worker'));
@@ -35,16 +38,22 @@ Fn.buildScheduler = async numberOfWorkers => {
 
 //TODO overhaul this for our new method
 //Takes in an array of text and compares 
-Fn.comparison = (Real,Generated) => {
-    const resultString = Generated;
+Fn.comparison = (reals,generated) => {
+
+    if(Array.isArray(generated)) generated = generated.join('');
+
     count = 0;
-    Real.forEach(real => {
-        if(resultString.indexOf(real)!==-1){
+    const itemsNotFound = [];
+    reals.forEach(real => {
+        if(generated.indexOf(real)!==-1){
             count++;
+        } else {
+            itemsNotFound.push(real);
         }
     });
-    comparisonScore = count/Real.length*100;
-    return comparisonScore;
+    const comparisonScore = count/reals.length*100;
+
+    return [comparisonScore,itemsNotFound];
 }
 
 module.exports = Fn;

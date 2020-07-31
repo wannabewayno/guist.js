@@ -4,6 +4,7 @@ const { performance } = require("perf_hooks"); // performance hooks
 const path = require('path');
 const fs = require('fs');
 const CODconfiguration = require('./COD.config');
+const { threshold } = require('jimp');
 const { scoreboardBoundary } = CODconfiguration
 // const { average } = require('./lib/post-processing.js');
 // 90% [110, 0.51]
@@ -15,6 +16,18 @@ const { scoreboardBoundary } = CODconfiguration
 // 90% [130, 0.53]
 // 90% consistent 90%'s accross the board with [146,0.51]
 // 100% BOOOOOO YEAAAAH [146, 0.61], [146, 0.62]
+
+// extend the Image prototype with custom filters
+require('../process4/lib/filters')();
+
+
+let threshCount = 170;
+const threshStep = 5
+
+let globalthresh = 0;
+const globalUpper = 0.9
+const globalLower = 0.5
+const globalStep = 0.05
 
 let t0 = 0;
 let t1 = 0;
@@ -50,9 +63,6 @@ function comparison(Real,Generated){
     comparisonScore = count/Real.length*100;
     return comparisonScore;
 }
-
-let threshCount = 164;
-let globalthresh = 0.77;
 
 const analyse = async () =>{
     const worker = createWorker();
@@ -96,11 +106,11 @@ const analyse = async () =>{
     fs.writeFileSync(path.join(__dirname,'/data/data.json'),JSON.stringify(data));
 
     if (threshCount < 255 ) {
-        if (globalthresh >= 0.8){
-            globalthresh = 0.55;
-            threshCount +=1;
+        if (globalthresh >= globalUpper){
+            globalthresh = globalLower;
+            threshCount += threshStep;
         }
-        globalthresh+=0.01;
+        globalthresh+= globalStep;
         Main(threshCount,globalthresh);
     }
    
@@ -112,92 +122,40 @@ t0 = performance.now();
 // Load in an image
 Image.load('./cropped4.png')
 //returns a promise
-.then(image=>{
-    let index = 0;
-
-    console.log('Average Pixels before:',average(image));
+.then(async image=>{
 
     image = image.crop(scoreboardBoundary)
+    const thresholdIterator ='';
+    // for (let thresholdIterator = 0; thresholdIterator < 50; thresholdIterator+=5) {
+        
+        // image = image.gaussianFilter({ sigma:2, radius:1 }); 
+        // image = image.crop({
+        //     x:0,
+        //     y:0,
+        //     width:25,
+        //     height:25,
+        // });
+        // // console.log(image);
+        // let array = image.getPixelsArray()
+        // console.log(array);
+        // imageMatrix = image.getMatrix({channel:0})
+        // console.log(imageMatrix);
+        image = image.grey();
+        image = image.scharrFilter();
+        // image = image.grey();
 
-    index++;
-    image = thresholdA(image,threshCount); // threshold pixels under the threshold limit to black
-    // image.save(`./output/${index}threshold.png`);
+         
 
-    console.log('Average Pixels After:',average(image));
+        await image.save(path.join(__dirname,`output${thresholdIterator}.png`)); //
+        console.log(`Image successfully processed`);
+    // }
 
-    // index++;
-    // image = image.blurFilter(); //blur filter
-    // image.save(`./output/${index}blur.png`)
-    
-    // index++;
-    // image = image.gaussianFilter(); //guassian blur filter
-    // image.save(`./output/${index}guassian.png`)
-
-    index++;
-    image = image.grey({keepAlpha:true}); // grey image
-    // image.save(`./output/${index}grey.png`);
-
-    // console.log(average(image));
-
-    // image = image.topHat(); // apply top hat filter
-    // image.save(`./output/${index}topHat.png`);
-    // index++;
-    
-    index++;
-    image = image.mask({algorithm:'threshold',threshold:globalthresh,useAlpha:true,invert:true}); //binary mask
-    // image.save(`./output/${index}mask.png`) 
-
-    // console.log(average(image));
-
-    // image = image.rgba8();
-    // image.save(`./output/${index}rgba8.png`) // rgb image from a binary mask
-    // index++;
    
-    // image = image.grey({keepAlpha:true}); // grey image
-    // image.save(`./output/${index}grey.png`);
-    // index++;
-
-    // index++;
-    // image = image.gaussianFilter(); //guassian blur filter
-    // image.save(`./output/${index}guassian.png`)
-
-    // image = image.sobelFilter(); //sobel filter
-    // image.save(`./output/${index}sobel.png`)
-    // index++;
-
-    // image = image.cannyEdge(); //sobel filter
-    // image.save(`./output/${index}sobel.png`)
-    // index++;
-
-    // image = threshold(image,90); // threshold pixels under 80 to black
-    // image.save(`./output/${index}threshold.png`);
-    // index++;
-    // console.log(image.data);
-
-    // image = image.mask({algorithm:'threshold',threshold:0.1,useAlpha:false,invert:true}); //binary mask
-    // image.save(`./output/${index}mask.png`) // thresholded image
-    // index++;
     
-    // image = image.blurFilter(); //blur filter
-    // image.save(`./output/${index}blur.png`)
-    // index++;
-
-    // image = image.grey({keepAlpha:false}); // grey image
-    // image.save(`./output/${index}grey.png`);
-    // index++;
-
-    // image = image.dilate(); // dilate image
-    // image.save(`./output/${index}dilate.png`);
-    // index++;
-
-    // image = image.erode(); // erode image
-    // image.save(`./output/${index}erode.png`);
-    // index++;
-    
-    image.save(path.join(__dirname,`output.png`)); //
+    image.save(path.join(__dirname,`output1.png`)); //
     console.log(`Image successfully processed`);
 })
-.finally(result=> analyse())
+// .finally(result=> analyse())
 }
 
 Main(threshCount,globalthresh);

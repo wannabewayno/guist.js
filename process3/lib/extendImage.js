@@ -14,7 +14,7 @@ module.exports = function(){
     },
 
     Image.prototype.findRows = function () {
-        const rowAverage = this.getMatrix().map((row,index) => [row.reduce((accumulator,currentValue) => accumulator + currentValue,0)/this.width,index]);
+        const rowAverage = boxImage.getMatrix({channels:boxImage.channels}).map((row,index) => [row.reduce((accumulator,currentValue) => accumulator + currentValue,0)/boxImage.width,index]);
         
         const lines = rowAverage
         .filter(([value,]) => value > 90 )

@@ -1,6 +1,4 @@
 require('./mathExtension.js');
-const { split } = require('./helpers.js');
-const { Image } = require('image-js');
 
 const getHue = ( R, G, B, max, chroma) => {
   let hue;
@@ -66,25 +64,4 @@ const RGB2HSL = ( R, G, B ) => {
     return [hue, saturation, lightness];
 }
 
-
-/** convertHSL
- * Takes in an image and returns the HSL channels.
- * @param  {Image} image
- * @return {object} returns an object with a 1D array of each HSL channel { hue:<array>, saturation:<array>, lightness:<array> } 
- */
-
-const channelsHSL = image => {
-    //get the RGB pixel array from the image
-    const pixelsRGB = image.getPixelsArray()
-
-    //map over every pixel and convert it to HSL
-    const pixelsHSL = pixelsRGB.map(pixel => RGB2HSL(...pixel));
-
-    //splits the 1D array of pixel arrays into it's seperate 1D channels
-    // const channels = split(pixelsHSL,'HSL');
-
-    //return HSL pixelsData.
-    return pixelsHSL
-}
-
-module.exports = channelsHSL;
+module.exports = RGB2HSL;
