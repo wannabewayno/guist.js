@@ -1,4 +1,5 @@
 const imageFn = require('./filters.js');
+const getFilterSequence = require('./filters')
 
 //TODO change how this works to allow static inputs in the filters. 
 

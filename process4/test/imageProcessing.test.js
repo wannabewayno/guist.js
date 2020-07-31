@@ -1,6 +1,6 @@
 const path = require('path');
 const libPath = path.join(__dirname,'../','lib');
-const Fn = require(path.join(libPath,'imageProcessing.js'));
+require(path.join(libPath,'imageProcessing.js'))();
 const testParameters = require('./testParameters.js');
 
 describe('createProgressHash(): unit test', () => {

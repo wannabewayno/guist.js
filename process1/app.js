@@ -1,16 +1,26 @@
 const { Image } = require('image-js'); //image processing library
 const { createWorker, createScheduler } = require('tesseract.js'); //OCR image to text library
 const { performance } = require("perf_hooks"); // performance hooks
-const util = require('util');
-const getPixels = require('get-pixels');
 const path = require('path');
+const fs = require('fs');
+const CODconfiguration = require('./COD.config');
+const { scoreboardBoundary } = CODconfiguration
 // const { average } = require('./lib/post-processing.js');
+// 90% [110, 0.51]
+// 90% [114, 0.48]
+// 90% [116, 0.51]
+// 90% [118, 0.54]
+// 90% [120, 0.54]
+// 90% [122, 0.53]
+// 90% [130, 0.53]
+// 90% consistent 90%'s accross the board with [146,0.51]
+// 100% BOOOOOO YEAAAAH [146, 0.61], [146, 0.62]
 
 let t0 = 0;
 let t1 = 0;
-
-gamerTag = ['killahhh.-Â\00BB',`seb008-seacow`,`[[Reaper]]`,`Poo|ToeKnee`,`Invictus`,`davemck89`,`|.:|Zio Matrix`,`darkraider`,`Icefyre`,`>TG< BloodSplat`,`xTwilightDawnx`,`da_moletrix`];
-bestValue = [(8/12)*100,0,0.35];
+gamerTag = ['[3arc]TJKeegan','[3arc]ABhura','[3arc]TEWells','PinkSine9','[3arc]JBojorquez','[3arc]AKrauss','[3arc]DAA Anthony','[3arc]GJNg','[3arc]MDonlon','[3arc]EFRich','Black Ops','Kills','Deaths','Ratio','Assists','Spetsnaz'];
+gamerTag2 = ['killahhh.-Â\00BB',`seb008-seacow`,`[[Reaper]]`,`Poo|ToeKnee`,`Invictus`,`davemck89`,`|.:|Zio Matrix`,`darkraider`,`Icefyre`,`>TG< BloodSplat`,`xTwilightDawnx`,`da_moletrix`];
+bestValue = [0,0,0];
 const average = image => {
     const sum = image.data.reduce((a,b) => a + b, 0);
     const average = sum/image.data.length;
@@ -41,19 +51,22 @@ function comparison(Real,Generated){
     return comparisonScore;
 }
 
-let threshCount = 7;
-let globalthresh = 0.34;
+let threshCount = 164;
+let globalthresh = 0.77;
 
 const analyse = async () =>{
     const worker = createWorker();
     await worker.load();
     await worker.loadLanguage('eng');
     await worker.initialize('eng');
+    await worker.setParameters({
+        tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]. ',
+    });
     const { data: { text } } = await worker.recognize(path.join(__dirname,`output.png`));
-    if(text.indexOf(`[[Reaper]]`) !==-1){
-        console.log("MATCH!!!!")
-    }
-    console.log(text);
+
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname,'data/data.json'),'utf-8'));
+    console.log(data);
+    
     await worker.terminate();
     t1 = performance.now();
     console.log(`Processed in ${Math.round((t1-t0)/1000)} Seconds`);
@@ -62,22 +75,32 @@ const analyse = async () =>{
     score.push(comparison(gamerTag,text));
     score.push(threshCount);
     score.push(globalthresh);
+    
     if (score[0]>bestValue[0]){
        for (let i = 0; i < score.length; i++) {
            bestValue[i] = score[i]
        }
     }
+    console.log(text);
     console.log(bestValue);
-    // console.log(util.inspect(allScores,{maxArrayLength:null}));
+    console.log([`MATCH:${score[0]}`]);
+    console.log('THRESHOLD:',score[1],score[2]);
 
+    if(score[0] >= 80){
+        data.over80++
+        data.data.push(score);
+    } else {
+        data.under80++
+    }
+
+    fs.writeFileSync(path.join(__dirname,'/data/data.json'),JSON.stringify(data));
 
     if (threshCount < 255 ) {
-        if (globalthresh >= 1){
-            globalthresh = 0;
-            threshCount ++;
+        if (globalthresh >= 0.8){
+            globalthresh = 0.55;
+            threshCount +=1;
         }
         globalthresh+=0.01;
-        console.log(threshCount,globalthresh);
         Main(threshCount,globalthresh);
     }
    
@@ -87,18 +110,20 @@ const analyse = async () =>{
 async function Main(threshCount,globalthresh) {
 t0 = performance.now();
 // Load in an image
-Image.load('./SB2cropped.png')
+Image.load('./cropped4.png')
 //returns a promise
 .then(image=>{
     let index = 0;
 
-    console.log(average(image));
+    console.log('Average Pixels before:',average(image));
+
+    image = image.crop(scoreboardBoundary)
 
     index++;
     image = thresholdA(image,threshCount); // threshold pixels under the threshold limit to black
     // image.save(`./output/${index}threshold.png`);
 
-    console.log(average(image));
+    console.log('Average Pixels After:',average(image));
 
     // index++;
     // image = image.blurFilter(); //blur filter
@@ -112,7 +137,7 @@ Image.load('./SB2cropped.png')
     image = image.grey({keepAlpha:true}); // grey image
     // image.save(`./output/${index}grey.png`);
 
-    console.log(average(image));
+    // console.log(average(image));
 
     // image = image.topHat(); // apply top hat filter
     // image.save(`./output/${index}topHat.png`);
@@ -122,7 +147,7 @@ Image.load('./SB2cropped.png')
     image = image.mask({algorithm:'threshold',threshold:globalthresh,useAlpha:true,invert:true}); //binary mask
     // image.save(`./output/${index}mask.png`) 
 
-    console.log(average(image));
+    // console.log(average(image));
 
     // image = image.rgba8();
     // image.save(`./output/${index}rgba8.png`) // rgb image from a binary mask

@@ -7,7 +7,7 @@ const worker = createWorker();
   await worker.loadLanguage('eng');
   await worker.initialize('eng');
   await worker.setParameters({
-    tessedit_char_whitelist: '0123456789',
+    tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[].',
   });
   const { data: { text } } = await worker.recognize('./images/image-processing.jpg');
   console.log(text);

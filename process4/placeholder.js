@@ -29,8 +29,8 @@ const analyse = async imageArray => {
     //Add the data to be processed to all workers in the scheduler (1 image/job per worker);
     //TODO build a spinner so we know it's doin things, will require inquirer
     //TODO maybe a progress bar? for the whole operation, will require inquirer
-    const results = await Promise.all(imageArray.map(imagePath => (
-        scheduler.addJob('recognize',imagePath)
+    const results = await Promise.all(imageArray.map(imageRef => (
+        scheduler.addJob('recognize',imageRef[0])
     )));
     
     // wait for the scheduler to finish.
@@ -68,19 +68,38 @@ async function Main(imageName, filters, progressHash) {
     
     // Load in our image , returns a promise
     Image.load(imagePath)
-    .then(image => { //do things with our image
+    .then(image=>{ //do things with our image
         
         let suffix = 1;
         let imageArray = [];
         //define the directory to save the image
         const outputFile = path.join(__dirname,'processed');
+       
+        //if we don't have a progressHash, we need to create one
+        if (progressHash === undefined){
+            
+            progressHash = Fn.createProgressHash(filters);
+        }
+       
+        //TODO We need to filter the chunk first. create some kind of iteration count with it?
+        //* need to work out, if this chunk will go over our paramters, and limit it if so.
+        const chunk = 1; // is chunk something we set? or an internal parameter we don't touch?
+        // loop over and create a 'chunk' of processed images stored in 'processed'
+        for (let i = 0; i < chunk; i++) { 
+            // update the progressHash
+            progressHash = Fn.updateProgress(progressHash);
+
+            //process the image
+            const processedImage = Fn.process(image,progressHash);
             
             //save the image with a suffix 
             const imagePath = path.join(outputFile,`output${suffix}.png`);
             processedImage.save(imagePath);
+            //Deep clone this instance of our progressHash
+            const filterParameters = JSON.parse(JSON.stringify(progressHash));
 
             //Store this instance with the processed Image
-            imageArray.push(imagePath);
+            imageArray.push([imagePath,filterParameters]);
 
             console.log(`Image:${suffix} Successfully Processed`);
             suffix++;
@@ -132,7 +151,20 @@ async function Main(imageName, filters, progressHash) {
 // actually running the application 
 // ==============================================================================================
 
+// define our filters.
+const filters = [
+    {
+        name:'thresholdRGB',
+        threshold:{upper:102,lower:100,step:1}
+    },
+    {
+        name:'thresholdBinary',
+        algorithim:'threshold',
+        threshold:{upper:0.66,lower:0.65,step:0.01},
+        invert:true,
+        useAlpha:true
+    }
+];
 
 //* Starts off the iteration.
 Main('SB3cropped.png',filters);
-
