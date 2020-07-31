@@ -50,7 +50,7 @@ module.exports = function(){
      * @param options
      */
     Image.prototype.thresholdHSL = function(options) {
-        
+
         //gets hsl data
         let pixels = channelsHSL(image);
     
@@ -63,7 +63,10 @@ module.exports = function(){
 
         return image;
     },
-
+    Image.prototype.cropMultiple = function(cropOptions){
+        croppedImages = cropOptions.map(cropOption => this.crop(cropOption))
+        return croppedImages;
+    },
 
     //TODO change function to Image.prototype.stats and return an object of stats -> Average, STD, etc...
     Image.prototype.average = function() {

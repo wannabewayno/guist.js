@@ -11,6 +11,9 @@ const path = require('path');
 const Fn = require('./lib/imageProcessing.js');
 const tesseract = require('./lib/tesseractHelpers.js');
 
+// loads extended image prototype
+require('./lib/filters')();
+
 // global variable for timestamps
 let t0 = 0; //start
 let t1 = 0; //end
@@ -72,20 +75,27 @@ async function Main(imageName, filters, progressHash) {
         
         let suffix = 1;
         let imageArray = [];
+
         //define the directory to save the image
+        const dataLocations = image.findRows();
+        console.log(dataLocations);
+
+        const images = Image.cropMultiple(dataLocations);
+
+
         const outputFile = path.join(__dirname,'processed');
-            
-            //save the image with a suffix 
-            const imagePath = path.join(outputFile,`output${suffix}.png`);
-            processedImage.save(imagePath);
+        
+        
+        //save the image with a suffix 
+        const imagePath = path.join(outputFile,`output${suffix}.png`);
+        processedImage.save(imagePath);
 
-            //Store this instance with the processed Image
-            imageArray.push(imagePath);
+        //Store this instance with the processed Image
+        imageArray.push(imagePath);
 
-            console.log(`Image:${suffix} Successfully Processed`);
-            suffix++;
-            
-        }
+        console.log(`Image:${suffix} Successfully Processed`);
+        suffix++;
+
         
         // returns
         // The chunk of processed images for tesseract
