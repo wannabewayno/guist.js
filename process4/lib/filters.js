@@ -284,13 +284,15 @@ module.exports = function(){
         
         // detects rows
         boxImage = boxImage.scharrFilter();
+        boxImage.save('./scharr.png');
 
         // convert to grey image
         boxImage = boxImage.grey({keepAlpha:true});
 
         // if under threshold set to black(0) otherwise set to white (255)
         boxImage = boxImage.threshold(180)
-  
+        boxImage.save('./threshold.png');
+        console.log('Height', boxImage.height)
         
         // reduces rows to 1 pixel with an intensity value equal to the average of all pixels in the row
         const rowAverage = boxImage.getMatrix().map((row,index) => [row.reduce((accumulator,currentValue) => accumulator + currentValue,0)/this.width,index]);
@@ -300,7 +302,7 @@ module.exports = function(){
         .filter(([,lineNumber],index,array) => {
         
             if(index - 1 !== -1){
-                return  lineNumber !== array[index - 1][1] + 1
+                return  (lineNumber !== array[index - 1][1] + 1 && lineNumber < this.height - 10)
             } else {
                 return true
             }
@@ -317,9 +319,10 @@ module.exports = function(){
             }
         })
         .filter(line => line)
-        .filter(({height}) => height > 5);
+        .filter(({height,y}) => height > 5 && y > 10)
 
         if(!scoreBoxes[0]) scoreBoxes.shift()
+        console.log(scoreBoxes);
 
         // special case for team on the bottom, will have a large heigth value
         // let's target this and crop it's x-axis slightly to not resolve the partial 0;

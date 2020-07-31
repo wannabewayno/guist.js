@@ -103,10 +103,10 @@ async function Main(imageName) {
             }
             
             const { average, std } = image.stats();
-            const threshold = average + std * 3
+            const threshold = average + std * 2.25
             image = image.thresholdRGB(threshold);
             image = image.grey();
-            image = image.thresholdMask(162);
+            image = image.thresholdMask(175);
 
             return image;
         })
@@ -163,5 +163,5 @@ async function Main(imageName) {
 
 
 //* Starts off the iteration.
-Main('cod2.png');
+Main('liveTest2.png');
 
