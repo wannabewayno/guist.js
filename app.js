@@ -5,6 +5,7 @@ const { performance } = require("perf_hooks"); // performance hooks
 const path = require('path');
 const saveMultiple = require('./lib/saveMultiple');
 const gameConfig = require('./config/blackOps'); // game specific information
+const extractText = require('./lib/extractText');
 
 // global variable for timestamps
 let t0 = 0; //start
@@ -102,10 +103,9 @@ async function Main(imageName) {
         console.log('Images successfully saved, sending to Tesseract');
         return imagePaths
     })
-    .then(async imagePaths => {
-
+    .then(imagePaths => {
         //Passes the imagePaths to tesseract to perform OCR.
-        await analyse(imagePaths);
+        extractText(imagePaths);
     });
 }
 
