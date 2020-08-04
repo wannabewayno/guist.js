@@ -1,27 +1,32 @@
-console.log(require('./lib/asciiBanner'));
+console.log(require('./cli/asciiBanner'));
 
-//Dependencies
+// Dependencies
+// ==============================================================================
 const rxjs = require('rxjs');
 const inquirer = require('inquirer');
-const exchange = require('./lib/prompts/exchange');
+const exchange = require('./cli/exchange');
+// const clearScreen = require('./cli/clearScreen'); takes a few seconds...
 
-//creates our promptQueue Subject to push prompts into at anytime
+// creates our promptQueue Subject to push prompts into at anytime
+// ===============================================================
 const promptQueue = new rxjs.Subject();
 
-console.log('First Question:',exchange.next());
-
-//Inquirer prompt module loading in the promptQueue
+// load the promptQueue into an inquirer prompt module
 inquirer.prompt(promptQueue).ui.process.subscribe(async response => {
-
-        console.log('response:', response);
+    
         const { answer } = response;
-        await exchange[answer.function](answer.variable);
+        const exchangeResponse = await exchange[answer.getAction()](answer.getAnswer());
 
-        //calls the next prompt in the promptQueue
-        promptQueue.next(exchange.next());
+        switch(exchangeResponse){
+            case 'exit': promptQueue.complete() // end the cli
+                break;
+            default: // calls the next prompt in the promptQueue
+                promptQueue.next(exchange.next());
+        }
+ 
     },
     error => {throw new Error(error)},
-    complete => console.log("all done")
+    complete => console.log("exiting...")
 )
 
 // kicks off the prompts by calling the first prompt

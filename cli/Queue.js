@@ -13,9 +13,13 @@ module.exports = class Queue {
         return this.queue[this.queuePosition-1];
     };
 
-    add(){}
+    add(prompt){
+        this.queue.push(prompt)
+    }
 
     current(){}
 
-    clear(){}
+    clear(){
+        this.queue.length = 0;
+    }
 }
