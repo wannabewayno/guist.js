@@ -56,7 +56,7 @@ sessionSchema.pre('save', async function(next){
                         }
                     });
                 } else {
-                    console.log(['1st game only']);
+                    // will run this block on the first game only
                     rankArray.push({ gamertag, team, total });
                 }
                 this.ranks.set(stat,rankArray);

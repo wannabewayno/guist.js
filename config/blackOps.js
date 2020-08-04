@@ -6,11 +6,11 @@ module.exports = {
     },
     teams:[
         {
-            name:'Communists',
+            name:'communists',
             hueRange:[355,5]
         },
         {
-            name:'Capitalists',
+            name:'capitalists',
             hueRange:[175,185]
         }
     ],
