@@ -49,5 +49,5 @@ async function Main(imageName) {
 // ==============================================================================================
 
 //* Starts off the iteration.
-Main('liveTest5.png');
+Main('grid.png');
 
