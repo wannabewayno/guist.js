@@ -14,9 +14,10 @@ module.exports = function(){
         }
     ])
     .then(async ({ name })=> {
-        console.log('Session Name:',name);
+        // create a new Session
         const currentSession = await Session.create({name});
-        console.log('Continuing to addGame');
+        
+        // send the user to add games
         return addGame(currentSession);
     });
 }

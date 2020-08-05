@@ -1,3 +1,6 @@
+require('dotenv').config(); // load env variables
+
+// load the logo whilst everything else initializes
 const guistLogo = require('./cli/asciiBanner')
 console.log(guistLogo);
 
