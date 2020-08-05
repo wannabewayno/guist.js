@@ -4,7 +4,7 @@ console.log(require('./cli/asciiBanner'));
 // ==============================================================================
 const rxjs = require('rxjs');
 const inquirer = require('inquirer');
-const exchange = require('./cli/exchange');
+const exchange = require('./cli/dispatch');
 // const clearScreen = require('./cli/clearScreen'); takes a few seconds...
 
 // creates our promptQueue Subject to push prompts into at anytime

@@ -1,4 +1,5 @@
 const { Session } = require('../models');
+const { throwError } = require('rxjs');
 
 module.exports = {
     getSessionByPhrase(req,res) {
@@ -28,11 +29,7 @@ module.exports = {
     getAllSessions(req,res){
 
     },
-    createSession(req,res){
-        console.log('this is being hit');
-        console.log(req.body);
-        Session.create(req.body)
-        .then(response => res.json(response))
-        .catch(error => res.status(422).json(error.response))
+    createSession(name){
+        return Session.create(name)
     }
 }

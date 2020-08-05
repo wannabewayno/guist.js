@@ -14,5 +14,4 @@ schemas.forEach(schema => {
 });
 
 // Exports our database for use within the app
-console.log(db);
 module.exports = db;
