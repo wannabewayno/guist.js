@@ -1,20 +1,11 @@
-require('dotenv').config(); // load env variables
-const { Image } = require('image-js'); //image processing library
-require('./lib/extendImagePrototype')(); // loads custom filters into the Image prototype
-const { performance } = require("perf_hooks"); // performance hooks
-const path = require('path');
-const saveMultiple = require('./lib/saveMultiple');
-const gameConfig = require('./config/blackOps'); // game specific information
-const extractText = require('./lib/extractText');
-const processForOCR = require('./lib/processForOCR');
-const cropToScoreboard = require('./lib/cropToScoreboard');
+
 
 async function Main(imageName) {
     try {
         await require('./config/mongoConnect')
         console.log('Connected to Mongo Atlas');
     } catch (error) {
-        console.log('ERROR: unable to connect tot Mongo Atlas',error);
+        console.log('ERROR: unable to connect to Mongo Atlas',error);
     }
 
     //creates a path to our image in the 'raw' directory

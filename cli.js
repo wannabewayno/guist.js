@@ -1,4 +1,5 @@
 require('dotenv').config(); // load env variables
+process.env.NODE_ENV = 'production';
 
 // load the logo whilst everything else initializes
 const guistLogo = require('./cli/asciiBanner')
@@ -24,4 +25,4 @@ async function main(queue) {
 
 require('./config/mongoConnect')
 .then(() => main(queue)) // connected, fire up the CLI
-.catch(error => console.log('ERROR: unable to connect tot Mongo Atlas',error)); // Error, tell the user
+.catch(error => console.log('ERROR: unable to connect to Mongo Atlas',error)); // Error, tell the user

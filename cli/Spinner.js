@@ -8,6 +8,6 @@ module.exports = class Spinner {
     }
 
     stopSpinner(){
-        
+
     }
 }
